@@ -40,7 +40,23 @@ An interactive text adventure game with GUI interface, featuring an LLM-driven N
 
 ## 🚀 Quick Start
 
-### 1. Installation
+### 1. Virtual Environment Setup (Recommended)
+
+```bash
+# Create virtual environment
+python -m venv tz-env
+
+# Activate virtual environment
+# On Windows:
+tz-env\Scripts\activate
+# On macOS/Linux:
+source tz-env/bin/activate
+
+# Verify activation (should show your venv path)
+which python
+```
+
+### 2. Installation
 
 ```bash
 # Clone the repository
@@ -53,7 +69,7 @@ pip install openai
 pip install -r requirements.txt
 ```
 
-### 2. Configuration
+### 3. Configuration
 
 Find and modify the following in `main3.py`:
 
@@ -64,11 +80,20 @@ client = OpenAI(
 )
 ```
 
-### 3. Run the Game
+### 4. Run the Game
 
 ```bash
 python "main 3.py"
 ```
+
+### 5. Deactivate Virtual Environment
+
+When you're done playing, deactivate the virtual environment:
+```bash
+deactivate
+```
+
+⚠️ **Note**: Remember to reactivate the virtual environment (`tz-env\Scripts\activate` on Windows or `source tz-env/bin/activate` on macOS/Linux) every time you want to run the game!
 
 ---
 
