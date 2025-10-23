@@ -73,7 +73,7 @@ class PlaceholderEntry(ttk.Entry):
 # ------------------------- LLM Client -------------------------
 client = OpenAI(
     api_key='your-api-key-here',  # Please replace with your actual API key
-    base_url="https://api.deepseek.com/v3.1_terminus_expires_on_20251015"  # no trailing slash
+    base_url="https://api.deepseek.com/v1"  # no trailing slash
 )
 MODEL_NAME = "deepseek-chat"  # Ensure correct
 
@@ -721,8 +721,8 @@ class App(tk.Tk):
         temp_canvas = tk.Canvas(container, width=1, height=1)
         temp_canvas.pack_forget()  # Don't display it
         
-        # Use actual font to measure text
-        font_tuple = (r".\fonts\SIMHEI.TTF", font_size)  # Use SimHei font for better Chinese character display
+        # Use system default font to measure text
+        font_tuple = ("Microsoft YaHei", font_size)  # Use system font for Chinese character display
         
         # Preserve original text formatting by splitting on actual line breaks first
         original_lines = text.split('\n')
@@ -857,7 +857,7 @@ class App(tk.Tk):
                 x_offset, 
                 y_offset + i * line_height + line_height // 2,
                 text=line, 
-                font=font_tuple,  # Use correct SIMHEI.TTF font
+                font=font_tuple,  # Use system default font
                 fill=fg_color, 
                 anchor="w"  # Left alignment
             )

@@ -60,8 +60,8 @@ which python
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/tz-lost-war-robot.git
-cd tz-lost-war-robot
+git clone https://github.com/Tz476/YI_Ding_FINAL.git
+cd YI_Ding_FINAL
 
 # Install dependencies
 pip install openai
@@ -71,19 +71,19 @@ pip install -r requirements.txt
 
 ### 3. Configuration
 
-Find and modify the following in `main3.py`:
+Find and modify the following in `main.py`:
 
 ```python
 client = OpenAI(
     api_key='your-api-key-here',  # Replace with your actual API key
-    base_url="https://api.deepseek.com/v3.1_terminus_expires_on_20251015"
+    base_url="https://api.deepseek.com/v1"
 )
 ```
 
 ### 4. Run the Game
 
 ```bash
-python "main 3.py"
+python "main.py"
 ```
 
 ### 5. Deactivate Virtual Environment
@@ -219,13 +219,8 @@ Check console output for detailed error messages and debugging information.
 
 ```
 tz-lost-war-robot/
-├── main3.py              # Main program file
-├── main.py               # Backup version
-├── a.py                  # Auxiliary script
-├── fonts/                # Font directory
-│   └── SIMHEI.TTF       # Chinese font
+├── main.py               # Main program file
 ├── requirements.txt      # Python dependencies
-├── 改进说明.md           # Development log (Chinese)
 └── README.md            # This file
 ```
 
@@ -260,7 +255,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Contact
 
 - **GitHub Issues**: [Project Issues](https://github.com/yourusername/tz-lost-war-robot/issues)
-- **Email**: 1021959990@qq.com
+- **Email**: your.email@example.com
 
 ---
 
