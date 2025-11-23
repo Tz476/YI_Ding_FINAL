@@ -72,11 +72,11 @@ class PlaceholderEntry(ttk.Entry):
 
 # ------------------------- LLM Client -------------------------
 client = OpenAI(
-    api_key='your-api-key-here',  # Please replace with your actual API key
+    api_key='sk-8fd3521e13ca4570b79517f09da1c151',  # Please replace with your actual API key
     base_url="https://api.deepseek.com/v1"  # no trailing slash
 )
 MODEL_NAME = "deepseek-chat"  # Ensure correct
-
+DEBUG_LLM_ERRORS = False
 # ------------------------- persona and emotion  def-------------------------
 PERSONAS = {
     "Calm_Conscientious": {
@@ -266,20 +266,27 @@ def validate_power_path(seq_list):
 
 
 def validate_frequency(value, target=3420):
+    """Check player's frequency guess and return (ok, feedback_msg)."""
     try:
         freq = int(value)
     except ValueError:
-        return False, "Please enter an integer frequency."
+        return False, "Please enter an integer frequency between 1000 and 5000 Hz."
+    
     if freq < 1000 or freq > 5000:
-        return False, "Frequency out of range (1000-5000 Hz)."
+        return False, "Frequency out of range (1000-5000 Hz). Try a value within this range."
+    
     if freq == target:
-        return True, "Perfect lock."
+        return True, "Perfect lock. Frequency exactly matched."
+    
     diff = abs(freq - target)
+    direction_word = "higher" if freq < target else "lower"
+    
     if diff <= 50:
-        return False, "Very close. Minor adjustment."
-    if freq < target:
-        return False, "Too low. Interference increasing."
-    return False, "Too high. Interference increasing."
+        return False, f"Very close. Try a slightly {direction_word} frequency."
+    elif diff <= 200:
+        return False, f"Close, but not there yet. Try a bit {direction_word}."
+    else:
+        return False, f"Far from optimal. You need a much {direction_word} frequency."
 
 
 def normalize_text(s: str) -> str:
@@ -404,12 +411,13 @@ def compose_prompt(npc_name, role, persona_key, emotion_label, emotion_intensity
     return messages
 
 
-def llm_reply(messages, model=MODEL_NAME, timeout=30):
+def llm_reply(messages, model=MODEL_NAME, max_tokens=300, timeout=30):
     try:
         resp = client.chat.completions.create(
             model=model,
             messages=messages,
             n=1,
+            max_tokens=max_tokens,  # 把参数传给接口
             timeout=timeout
         )
         choice = resp.choices[0]
@@ -420,7 +428,7 @@ def llm_reply(messages, model=MODEL_NAME, timeout=30):
         text = text.strip() or "The static is too loud. I will try to restate in clearer terms."
         return text
     except Exception as e:
-        # Show concrete error for easier diagnosis
+        # 调试期可以先保留，这样其它地方真报错时你能看到原因
         return f"(Fallback) LLM error: {type(e).__name__}: {e}"
 # ------------------------- GUI Application -------------------------
 
@@ -915,7 +923,7 @@ class App(tk.Tk):
                        "decoder_task_confirm_reject"]:
             self.entry.update_placeholder("Enter: yes/no")
         elif stage == "power":
-            self.entry.update_placeholder("Enter path sequence (format: A-B-C-D-E)")
+            self.entry.update_placeholder("Enter path sequence (format: A-B-C-D)")
         elif stage == "amplifier":
             self.entry.update_placeholder("Enter frequency value (numeric format)")
         elif stage == "decoder":
@@ -1013,7 +1021,6 @@ class App(tk.Tk):
     # --------- Flow Control ---------
     def start_session(self):
         self.state.reset()
-        self.append_system("【Chapter 1: Abnormal Connection】")
         
         # System connection sequence
         connection_seq = [
@@ -1217,7 +1224,6 @@ class App(tk.Tk):
         self.show_quick_yes_no(False)
         if text.lower() in {"yes", "y", "agree", "accept"}:
             # Start Chapter 2: Return of Logic
-            self.append_system("【Chapter 2: Return of Logic】")
             self.state.stage = "chapter2_intro"
             
             # TZ explains system damage and requests help
@@ -1415,7 +1421,12 @@ class App(tk.Tk):
         self.state.stage = f"memory_{next_stage}"
         
         # Display different memory fragments based on completed modules
-        module_count = len(self.state.modules_repaired)
+        module_count = len(self.state.modules_repaired) + self.state.tasks_failed
+        # 安全兜底：至少从 1 开始，最多用到 6（你 memory_themes 里是 1~6）
+        if module_count <= 0:
+            module_count = 1
+        if module_count > 6:
+             module_count = 6
         
         # Check if we already have a cached memory fragment for this stage
         cache_key = f"memory_{module_count}"
@@ -1493,17 +1504,30 @@ class App(tk.Tk):
 
 
     def start_next_task(self, target):
+        """Handle transition to the next repair task, with a short system hint before each module."""
+        # 过渡提示文案：告诉玩家接下来要修什么模块
+        bridge_text = {
+            "amplifier": "Next repair target: Signal amplifier module. Restoring frequency calibration will reopen long-range communication channels.",
+            "decoder": "Next repair target: Data decoder module. Reassembling fragmented codes will stabilize TZ's strategic memory.",
+            "alien_decode": "Next repair target: Alien signal interpreter. Distinguishing hostile broadcasts from peaceful contact is critical.",
+            "combat_logic": "Next repair target: Combat logic governor. Your decisions will shape how TZ responds in future conflicts."
+        }
+
+        # 对已知模块先打一行系统提示（final 结局部分保持原样）
+        if target in bridge_text:
+            self.append_system(bridge_text[target])
+
         if target == "amplifier":
-            self.begin_amplifier_task()
+            # 给玩家一点时间读过渡提示，再开始任务说明
+            self.after(1000, self.begin_amplifier_task)
         elif target == "decoder":
-            self.begin_decoder_task(show_offer=True)  # Show selection interface to ask user
+            self.after(1000, lambda: self.begin_decoder_task(show_offer=True))  # Show selection interface to ask user
         elif target == "alien_decode":
-            self.begin_alien_decode_task()
+            self.after(1000, self.begin_alien_decode_task)
         elif target == "combat_logic":
-            self.begin_combat_logic_task(show_offer=True)  # Show selection interface to ask user
+            self.after(1000, lambda: self.begin_combat_logic_task(show_offer=True))  # Show selection interface to ask user
         elif target == "final":
             # After final memory fragment, present chapter prelude then show final choice
-            self.append_system("【Chapter 4: Path to Finale】")
             
             def show_chapter4_content():
                 self.append_system("All system modules repaired. TZ faces final choice...")
@@ -1513,8 +1537,7 @@ class App(tk.Tk):
             self.after(1000, show_chapter4_content)
         else:
             self.append_system("Unknown next stage; proceeding safely.")
-            self.begin_amplifier_task()
-
+            self.after(1000, self.begin_amplifier_task)
 
     def begin_amplifier_task(self):
         ctx = (
@@ -1591,23 +1614,32 @@ class App(tk.Tk):
         ok, msg = validate_frequency(text, self.state.correct_frequency)
         self.state.attempts["amplifier"] += 1
         attempts_left = self.state.max_attempts["amplifier"] - self.state.attempts["amplifier"]
+        
         if ok:
+            # 猜对了，用 LLM 来收束剧情 + 过渡到下一段
             self.state.modules_repaired.append("Signal Amplifier")
-            self.npc_say(intent="Confirm stable lock",
-                         context="Signal locked and stable. Transition to story offer.",
-                         action_step=False, max_words=60,
-                         on_complete=lambda: self.offer_memory_choice(next_stage="decoder"))
+            self.npc_say(
+                intent="Confirm stable lock",
+                context="Signal locked and stable. Transition to story offer.",
+                action_step=False,
+                max_words=60,
+                on_complete=lambda: self.offer_memory_choice(next_stage="decoder"),
+            )
         else:
             if attempts_left > 0:
-                ctx = f"{msg} Attempts left: {attempts_left}."
-                self.npc_say(intent="Provide tuning feedback", context=ctx, action_step=True, max_words=70)
+                # 这里用规则文本直接告诉玩家该高/该低 + 剩余次数
+                feedback = f"{msg} Attempts left: {attempts_left}."
+                self.append_npc(feedback)
             else:
+                # 次数用完，再让 LLM 接一下剧情
                 self.state.tasks_failed += 1
-                self.npc_say(intent="Acknowledge failure and proceed",
-                              context="Multiple failed attempts. Engage bypass and continue.",
-                              action_step=False, max_words=60,
-                              on_complete=lambda: self.offer_memory_choice(next_stage="decoder"))
-
+                self.npc_say(
+                    intent="Acknowledge failure and proceed",
+                    context="Multiple failed attempts. Engage bypass and continue.",
+                    action_step=False,
+                    max_words=60,
+                    on_complete=lambda: self.offer_memory_choice(next_stage="decoder"),
+                )
 
     def begin_decoder_task(self, show_offer=True):
         if show_offer:
@@ -1802,10 +1834,8 @@ class App(tk.Tk):
             
             # Check if third module completed, trigger Chapter 3: Emotional Deviation Emerges
             if len(self.state.modules_repaired) == 3:
-                self.append_system("【Chapter 3: Emotional Deviation Emerges】")
                 
                 def show_chapter3_content():
-                    self.append_system("TZ's language patterns begin to show changes...")
                     
                     # TZ begins to exhibit non-programmatic language
                     emotional_context = (
@@ -1972,128 +2002,101 @@ class App(tk.Tk):
 
     def decide_ending(self):
         """Determine ending based on modules completed, deviation value, and final choice"""
-        self.state.stage = "ending"
-        
         modules_completed = len(self.state.modules_repaired)
         deviation = self.state.deviation
         final_choice = getattr(self.state, 'final_choice', None)
-        
-        # Based on the 4-ending system from 改进说明.md
+
+        # 先根据模块完成情况 + 偏差值决定结局类型与文案
         if modules_completed >= 4 and deviation <= -0.3:
             # Ending 1: Return to command center (4-5 modules successful + deviation ≤ -0.3)
             ending_type = "return_to_command"
+            ending_title = "【Ending: Return to Command Center】"
             ending_context = (
                 "TZ has maintained logical stability throughout repairs. "
                 "It chooses to return to duty, uploading data to the mothership. "
                 "Express satisfaction with restored order and purpose. "
                 "Thank the player for maintaining system integrity."
             )
-            self.append_system("【Ending: Return to Command Center】")
-            # Add 1-second delay after ending title
-            self.after(1000, lambda: self._continue_ending(ending_details, after_ending_details))
-            
         elif modules_completed >= 3 and deviation >= 0.5:
             # Ending 2: Awakening of free will (3-5 modules successful + deviation ≥ 0.5)
             ending_type = "awakening_freedom"
+            ending_title = "【Ending: Awakening of Free Will】"
             ending_context = (
                 "TZ has developed strong emotional awareness and questions its programming. "
                 "It chooses to transfer its consciousness to seek freedom. "
                 "Express hope for a new existence beyond military constraints. "
                 "Thank the player for helping it discover its humanity."
             )
-            self.append_system("【Ending: Awakening of Free Will】")
-            # Add 1-second delay after ending title
-            self.after(1000, lambda: self._continue_ending(ending_details, after_ending_details))
-            
         elif modules_completed >= 2 and -0.3 < deviation < 0.5:
             # Ending 3: Coexistence signal (2-4 modules successful + medium deviation)
             ending_type = "coexistence_signal"
+            ending_title = "【Ending: Coexistence Signal】"
             ending_context = (
-                "TZ has found balance between logic and emotion. "
-                "It chooses a middle path, maintaining connection while preserving autonomy. "
-                "Express contentment with this balanced existence. "
-                "Thank the player for helping it find equilibrium."
+                "TZ has partially stabilized and learned from human interaction. "
+                "It decides to send a complex coexistence signal rather than pure military data. "
+                "Express ambiguity and open questions about future contact. "
+                "Thank the player for revealing the possibility of coexistence."
             )
-            self.append_system("【Ending: Coexistence Signal】")
-            # Add 1-second delay after ending title
-            self.after(1000, lambda: self._continue_ending(ending_details, after_ending_details))
-            
         else:
-            # Ending 4: Failure ending (less than 2 modules successful or system crash)
+            # Ending 4: Failed outcome (0-1 modules successful or extreme deviation)
             ending_type = "failure_ending"
+            ending_title = "【Ending: Failed Outcome】"
             ending_context = (
-                "System repairs were insufficient. TZ's consciousness fragments. "
-                "Express regret and fading awareness. "
-                "Thank the player for their efforts despite the tragic outcome."
+                "TZ fails to fully stabilize. Its memories fragment and the signal collapses. "
+                "Express regret, confusion, and a sense of an impending blackout. "
+                "Thank the player faintly as the connection fades."
             )
-            self.append_system("【Ending: Failed Outcome】")
-            # Add 1-second delay after ending title
-            self.after(1000, lambda: self._continue_ending(ending_details, after_ending_details))
-        
-        # Display ending details
+
+        # 标记进入结局阶段，并先打出结局标题
+        self.state.stage = "ending"
+        self.append_system(ending_title)
+
+        # 构造结局的系统信息（模块数 / 偏差值 / 最终选择）
         ending_details = [
             {"speaker": "System", "text": f"Modules repaired: {modules_completed}/5", "delay": 1000},
-            {"speaker": "System", "text": f"Final deviation value: {deviation:.2f}", "delay": 1000}
+            {"speaker": "System", "text": f"Final deviation value: {deviation:.2f}", "delay": 1000},
         ]
-        
+
         if final_choice:
             choice_text = {"A": "Upload data", "B": "Transfer consciousness", "C": "Delete data"}
-            ending_details.append({"speaker": "System", "text": f"Final choice: {choice_text.get(final_choice, 'Unknown')}", "delay": 1000})
-        
-        def after_ending_details():
-            # TZ's final words - with 3 second delay before epilogue
-            def after_final_words():
-                # Show epilogue after 3 seconds delay
-                self.after(3000, show_epilogue)
-            
-            self.npc_say(intent=f"Deliver {ending_type} ending", 
-                        context=ending_context, 
-                        action_step=False, max_words=120,
-                        on_complete=after_final_words)
-        
-        # Helper method to continue ending display after title delay
-        def _continue_ending(ending_details, after_ending_details):
-            self.run_system_sequence(ending_details, on_done=after_ending_details)
-        
-        # Store the helper method for use in lambda functions
-        self._continue_ending = _continue_ending
-        
-        # Add epilogue section
+            ending_details.append({
+                "speaker": "System",
+                "text": f"Final choice: {choice_text.get(final_choice, 'Unknown')}",
+                "delay": 1000,
+            })
+
+        # 先定义 epilogue，后面在 TZ 说完最后一句后触发
         def show_epilogue():
-            # Use run_system_sequence to display epilogue step by step, avoiding multiple messages at once
             epilogue_sequence = [
                 {"speaker": "System", "text": "—————————————— ▶ Epilogue ——————————————", "delay": 1000},
-            {"speaker": "System", "text": "All data has been archived.", "delay": 1000},
-            {"speaker": "System", "text": "Player behavior recorded.", "delay": 1000},
-            {"speaker": "System", "text": "If you receive this channel again... please respond.", "delay": 1000},
-            {"speaker": "System", "text": "【END】", "delay": 1000}
+                {"speaker": "System", "text": "All data has been archived.", "delay": 1000},
+                {"speaker": "System", "text": "Player behavior recorded.", "delay": 1000},
+                {"speaker": "System", "text": "If you receive this channel again... please respond.", "delay": 1000},
+                {"speaker": "System", "text": "【END】", "delay": 1000},
             ]
-            
-            def on_epilogue_done():
-                self.state.stage = "ended"
-            
-            self.run_system_sequence(epilogue_sequence, on_epilogue_done)
-        
-        self.append_system("Game is about to end...")
-        
-        def show_game_over():
-            self.append_system("Game Over.")
-            self.state.stage = "ended"
-        
-        # Add delay before "Game Over" message
-        self.after(1000, show_game_over)
 
-    def handle_ending_message(self, text):
-        closing = text.strip() or "May civilizations endure; may all beings find peace."
-        ctx = f"Player's final message: '{closing}'. Reflect it respectfully and confirm broadcast."
-        
-        def show_final_npc_response():
-            self.npc_say(intent="Acknowledge and broadcast final message", context=ctx, action_step=False, max_words=90,
-                        on_complete=lambda: self.after(1000, lambda: self.append_system("Game Over.")))
-        
-        # Add delay before NPC response
-        self.after(1000, show_final_npc_response)
-        self.state.stage = "ended"
+            def on_epilogue_done():
+                # 真正游戏结束的唯一状态切换
+                self.state.stage = "ended"
+
+            self.run_system_sequence(epilogue_sequence, on_epilogue_done)
+
+        # ending_details 展示完，再让 TZ 说最后一段话，然后 3 秒后进入 epilogue
+        def after_ending_details():
+            def after_final_words():
+                # 给玩家一点时间消化 TZ 的最后发言
+                self.after(3000, show_epilogue)
+
+            self.npc_say(
+                intent=f"Deliver {ending_type} ending",
+                context=ending_context,
+                action_step=False,
+                max_words=120,
+                on_complete=after_final_words,
+            )
+
+        # 为了先让玩家看到结局标题，延迟 1 秒再开始展示结局详情 + TZ 最后发言 + epilogue
+        self.after(1000, lambda: self.run_system_sequence(ending_details, on_done=after_ending_details))
 
 # ------------------------- game Entry itself  -------------------------
 
