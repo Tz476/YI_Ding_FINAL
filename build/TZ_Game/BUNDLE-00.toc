@@ -1,0 +1,3 @@
+([('TZ_War_Robot',
+   '/Users/tony/Desktop/YI_Ding_FINAL/dist/TZ_War_Robot',
+   'EXECUTABLE')],)

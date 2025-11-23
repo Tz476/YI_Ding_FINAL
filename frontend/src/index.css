@@ -1,0 +1,378 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Rajdhani', 'Share Tech Mono', monospace;
+  background: #0a0e1a;
+  color: #00ffcc;
+  overflow: hidden;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 217, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 217, 255, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 217, 255, 0.8);
+}
+
+/* 发光文字效果 */
+.glow-text {
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+}
+
+/* 打字机效果 */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink {
+  50% { border-color: transparent }
+}
+
+.typing-effect {
+  overflow: hidden;
+  border-right: 2px solid #00ffcc;
+  white-space: nowrap;
+  animation: typing 3s steps(40, end), blink 0.75s step-end infinite;
+}
+
+/* 淡入动画 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+/* 上滑动画 */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out;
+}
+
+/* 发光动画 */
+@keyframes glow {
+  0%, 100% {
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+  50% {
+    text-shadow: 0 0 20px currentColor, 0 0 30px currentColor, 0 0 40px currentColor, 0 0 50px currentColor;
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* 输入框聚焦效果 */
+input:focus {
+  animation: input-glow 0.3s ease-out;
+}
+
+@keyframes input-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 204, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgba(0, 255, 204, 0);
+  }
+}
+
+/* ========== 游戏化视觉效果 ========== */
+
+/* CRT 扫描线效果 */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.scanline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(transparent, rgba(0, 255, 204, 0.3), transparent);
+  pointer-events: none;
+  animation: scanline 8s linear infinite;
+  z-index: 9999;
+}
+
+/* CRT 屏幕网格 */
+.crt-effect::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 故障效果 - 禁用以防止窗口跳动 */
+@keyframes glitch {
+  0%, 90%, 100% { opacity: 1; }
+  91% { opacity: 0.98; }
+  93% { opacity: 0.99; }
+  95% { opacity: 0.97; }
+  97% { opacity: 0.98; }
+}
+
+.glitch-trigger {
+  /* animation: glitch 10s infinite; */
+  /* 禁用以防止窗口跳动 */
+}
+
+/* 全息投影闪烁 */
+@keyframes hologram-flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+  75% { opacity: 0.95; }
+}
+
+.hologram {
+  animation: hologram-flicker 3s ease-in-out infinite;
+}
+
+/* 能量脉冲增强 - 移除 scale 以防止跳动 */
+@keyframes energy-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(0, 191, 255, 0.3),
+                inset 0 0 8px rgba(0, 191, 255, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(0, 191, 255, 0.5),
+                0 0 35px rgba(0, 191, 255, 0.35),
+                inset 0 0 15px rgba(0, 191, 255, 0.25);
+  }
+}
+
+.energy-pulse {
+  animation: energy-pulse 4s ease-in-out infinite;
+}
+
+/* AI 思考动画 */
+@keyframes ai-thinking {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.ai-thinking-dot {
+  animation: ai-thinking 1.4s ease-in-out infinite;
+}
+
+.ai-thinking-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.ai-thinking-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* 打字机光标 */
+@keyframes cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.typing-cursor::after {
+  content: "▋";
+  animation: cursor-blink 1s step-end infinite;
+  color: #00ffcc;
+}
+
+/* 数据流动效果 */
+@keyframes data-flow {
+  0% { transform: translateX(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+.data-stream {
+  animation: data-flow 3s linear infinite;
+}
+
+/* 连接脉冲 */
+@keyframes connection-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.connection-indicator {
+  animation: connection-pulse 2s ease-in-out infinite;
+}
+
+/* 能量充能效果 */
+@keyframes charge-up {
+  0% { width: 0%; opacity: 0.5; }
+  100% { width: 100%; opacity: 1; }
+}
+
+.charging {
+  animation: charge-up 2s ease-out forwards;
+}
+
+/* 启动序列 */
+@keyframes system-boot {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+    filter: blur(10px);
+  }
+  50% {
+    opacity: 0.5;
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+.system-boot {
+  animation: system-boot 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 消息滑入动画 */
+@keyframes message-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.message-appear {
+  animation: message-slide-in 0.4s ease-out;
+}
+
+/* HUD 闪烁 */
+@keyframes hud-blink {
+  0%, 90%, 100% { opacity: 1; }
+  95% { opacity: 0.3; }
+}
+
+.hud-element {
+  animation: hud-blink 5s infinite;
+}
+
+/* ========== 滑动条样式 ========== */
+
+/* 自定义滑动条 - WebKit 浏览器 */
+input[type="range"].slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+input[type="range"].slider-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #00ffcc;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.8),
+              0 0 20px rgba(0, 255, 204, 0.5),
+              inset 0 0 5px rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+  border: 2px solid rgba(0, 255, 204, 0.3);
+}
+
+input[type="range"].slider-thumb::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 1),
+              0 0 30px rgba(0, 255, 204, 0.7),
+              inset 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+input[type="range"].slider-thumb::-webkit-slider-thumb:active {
+  transform: scale(1.1);
+}
+
+/* Firefox */
+input[type="range"].slider-thumb::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #00ffcc;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.8),
+              0 0 20px rgba(0, 255, 204, 0.5),
+              inset 0 0 5px rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+  border: 2px solid rgba(0, 255, 204, 0.3);
+}
+
+input[type="range"].slider-thumb::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 1),
+              0 0 30px rgba(0, 255, 204, 0.7),
+              inset 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* ========== 响应式文本处理 ========== */
+
+/* 防止长单词和URL溢出 */
+.break-words {
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* 确保消息容器不会水平溢出 */
+.message-appear {
+  max-width: 100%;
+  overflow: hidden;
+}
