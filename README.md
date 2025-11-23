@@ -254,9 +254,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-- **GitHub Issues**: [Project Issues](https://github.com/yourusername/tz-lost-war-robot/issues)
-- **Email**: your.email@example.com
-
+- **Email**: dingyi476@163.com
 ---
 
 **Enjoy your conversation journey with TZ!** 🤖✨
