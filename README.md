@@ -1,44 +1,94 @@
 # TZ - The Lost War Robot 🤖
 
-An interactive text adventure game with GUI interface, featuring an LLM-driven NPC dialogue system. Players engage in conversations with TZ, a memory-lost war robot, helping restore its memory and system functions through various technical puzzles.
+An interactive text adventure game with a GUI chat interface, featuring an LLM-driven NPC dialogue system. Players converse with **TZ**, a war robot who has lost parts of its memory and logic core, and help restore its systems through a series of technical puzzles and moral decisions.
+
+The current **v1.0** release uses a **web-based cyber UI** (frontend + Flask backend) and also provides a packaged macOS app (`dist/TZ_War_Robot.app`) so the game can be played without setting up the development environment.
 
 ---
 
 ## 🎮 Game Features
 
-- **🧠 Intelligent NPC Dialogue**: Dynamic conversations powered by OpenAI API, with TZ exhibiting various emotional states and personality traits
-- **🧩 Diverse Puzzles**: Technical challenges including path planning, frequency adjustment, password decryption, and logical reasoning
-- **🌟 Branching Storylines**: Multiple endings based on player choices and performance
-- **💭 Memory Fragment System**: AI-generated dynamic memory content for unique gameplay experiences
-- **💻 Modern GUI Interface**: Elegant Tkinter-based chat interface with bubble conversations and status notifications
+- **🧠 Intelligent NPC Dialogue**  
+  Dynamic conversations powered by OpenAI-compatible APIs (DeepSeek / OpenAI / Ollama), with configurable persona, emotion and intensity for TZ.
+
+- **🧩 Structured Technical Puzzles**  
+  A sequence of system-repair tasks, including:
+  - Power path restoration  
+  - Signal amplifier frequency calibration  
+  - Code / password decryption  
+  - Alien signal decoding  
+  - Combat logic reconstruction
+
+- **🌟 Branching Storylines**  
+  A deviation value tracks the player’s decisions and performance, unlocking multiple endings and different attitudes from TZ.
+
+- **💭 Memory Fragment System**  
+  AI-generated memory clips that reflect the current game state, giving each playthrough slightly different narrative details.
+
+- **💻 Modern GUI Interface**  
+  A custom sci-fi chat UI in the browser (frontend) with bubble messages, status notifications, typing delays and timed message sequencing to preserve narrative rhythm.
+
+- **📦 Packaged Desktop Build (macOS)**  
+  A standalone `TZ_War_Robot.app` (PyInstaller + pywebview) in the `dist` folder for one-click play on macOS.
+
+> Note: A legacy Tkinter prototype was used in earlier versions; the current 1.0 build is based on the web UI + Flask backend architecture.
 
 ---
 
 ## 🛠️ Technology Stack
 
-- **Python 3.7+** - Core programming language
-- **Tkinter** - GUI framework
-- **OpenAI Python SDK** - LLM API integration
-- **Threading** - Asynchronous processing
+- **Backend**
+  - Python 3.9+ (tested)  
+  - Flask – HTTP API and game session management  
+  - Custom game state machine (`game_logic.py`, `task_handlers.py`, `memory_generator.py`, `stage_handlers.py`)  
+  - OpenAI-compatible HTTP client (supports DeepSeek, OpenAI, Ollama, etc.)
 
-### Supported AI Backends
-- 🌐 **DeepSeek API** (online)
-- 🌐 **OpenAI API** (online)
-- 🏠 **Ollama** (local deployment)
+- **Frontend**
+  - Modern web stack (React-style SPA, built into `frontend/dist`)  
+  - Chat-style layout with neon / cyberpunk theming
+
+- **Desktop Packaging**
+  - PyInstaller – builds `TZ_War_Robot.app` using `TZ_Game.spec`  
+  - pywebview – opens the web UI in a native desktop window
 
 ---
 
 ## 📋 System Requirements
 
-- **Python**: 3.7 or higher
-- **OS**: Windows/macOS/Linux
-- **Network**: Stable connection (for online APIs) or sufficient local resources (for Ollama)
-- **Storage**: At least 100MB available disk space
-- **Memory**: 8GB+ recommended when using Ollama for local AI models
+### Running the packaged macOS app
 
+- **OS**: macOS (Apple Silicon or Intel)
+- **Storage**: ~200 MB free disk space
+- **Network**:  
+  - Stable connection for online APIs (DeepSeek / OpenAI), or  
+  - Sufficient local resources when using **Ollama** for on-device LLMs
+- No separate Python / Node installation is required if you only use the packaged app in `dist/`.
+
+### Running from source (development mode)
+
+- **Python**: 3.9 or higher
+- **Node.js + npm**: for building the frontend
+- **OS**: Windows / macOS / Linux
+- **Memory**: 8 GB+ recommended when using local LLMs (Ollama)
+- See the “Local Development” section for detailed setup instructions.
 ---
 
+
 ## 🚀 Quick Start
+
+### 🧪 Playing the packaged 1.0 build (macOS)
+
+If you downloaded the final 1.0 release that already contains a `dist` folder, you can try the game **without installing Python or Node**:
+
+1. Open the `dist` folder in Finder.
+2. On macOS, double-click **`TZ_War_Robot.app`** to launch the game.
+3. Scroll down to the **Security** section. You should see a message like  
+      `“TZ_War_Robot.app” was blocked from use because it is not from an identified developer.`
+4. Click **“Open Anyway”** (or **Allow**).
+5. Go back to Finder and open `TZ_War_Robot.app` again, then click **Open** in the dialog.
+
+The sections below describe how to run the game from source when you want to modify the code or rebuild the project.
+
 
 ### 1. Virtual Environment Setup (Recommended)
 
