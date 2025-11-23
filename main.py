@@ -72,7 +72,7 @@ class PlaceholderEntry(ttk.Entry):
 
 # ------------------------- LLM Client -------------------------
 client = OpenAI(
-    api_key='sk-8fd3521e13ca4570b79517f09da1c151',  # Please replace with your actual API key
+    api_key='API KEY',  # Please replace with your actual API key
     base_url="https://api.deepseek.com/v1"  # no trailing slash
 )
 MODEL_NAME = "deepseek-chat"  # Ensure correct
